@@ -12,16 +12,16 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
 
-public class LoginTest {
+public abstract class LoginTestBase {
 
-    private WebDriver driver;
+    protected static final String LOGIN_URL = "https://sinhvien1.tlu.edu.vn/#/login";
 
-    private WebDriver createDriver() {
+    protected WebDriver driver;
+
+    protected WebDriver createDriver() {
         ChromeOptions options = new ChromeOptions();
 
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
@@ -48,17 +48,10 @@ public class LoginTest {
         }
     }
 
-    @Test
-    public void loginSuccess() {
-        driver = createDriver();
-
-        String username = getRequiredEnv("TLU_USERNAME");
-        String password = getRequiredEnv("TLU_PASSWORD");
-
-        driver.get("https://sinhvien1.tlu.edu.vn/#/login");
+    protected void openLoginPageAndSubmit(String username, String password) {
+        driver.get(LOGIN_URL);
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-
         List<WebElement> inputs = wait.until(d -> {
             List<WebElement> visibleInputs = d.findElements(By.cssSelector("input")).stream()
                     .filter(WebElement::isDisplayed)
@@ -74,44 +67,16 @@ public class LoginTest {
 
         WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button")));
         loginButton.click();
-
-        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/login")));
-
-        Assert.assertFalse(driver.getCurrentUrl().contains("/login"));
     }
 
-    @Test
-    public void loginFailWrongPassword() throws InterruptedException {
-        driver = createDriver();
+    protected String getRequiredEnv(String name) {
+        String value = System.getenv(name);
 
-        String username = getRequiredEnv("TLU_USERNAME");
-        String wrongPassword = "sai_mat_khau_123";
+        if (value == null || value.isBlank()) {
+            throw new SkipException("Missing environment variable: " + name);
+        }
 
-        driver.get("https://sinhvien1.tlu.edu.vn/#/login");
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-
-        List<WebElement> inputs = wait.until(d -> {
-            List<WebElement> visibleInputs = d.findElements(By.cssSelector("input")).stream()
-                    .filter(WebElement::isDisplayed)
-                    .toList();
-            return visibleInputs.size() >= 2 ? visibleInputs : null;
-        });
-
-        WebElement usernameInput = inputs.get(0);
-        WebElement passwordInput = inputs.get(1);
-
-        typeValue(usernameInput, username);
-        typeValue(passwordInput, wrongPassword);
-
-        WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button")));
-        loginButton.click();
-
-        Thread.sleep(3000);
-
-        Assert.assertTrue(
-                driver.getCurrentUrl().contains("/login"),
-                "Wrong password should keep the user on the login page.");
+        return value;
     }
 
     private void typeValue(WebElement element, String value) {
@@ -123,15 +88,5 @@ public class LoginTest {
                 "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));"
                         + "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));",
                 element);
-    }
-
-    private String getRequiredEnv(String name) {
-        String value = System.getenv(name);
-
-        if (value == null || value.isBlank()) {
-            throw new SkipException("Missing environment variable: " + name);
-        }
-
-        return value;
     }
 }
