@@ -31,7 +31,7 @@ jobs:
           key: maven-${{ hashFiles('**/pom.xml') }}
 
       - name: Run Login Success Test
-        run: mvn -Dtest=LoginSuccessTest test
+        run: mvn -Dtest=LoginTest#loginSuccess test
         env:
           TLU_USERNAME: ${{ secrets.TLU_USERNAME }}
           TLU_PASSWORD: ${{ secrets.TLU_PASSWORD }}
@@ -64,7 +64,7 @@ jobs:
           key: maven-${{ hashFiles('**/pom.xml') }}
 
       - name: Run Login Wrong Password Test
-        run: mvn -Dtest=LoginWrongPasswordTest test
+        run: mvn -Dtest=LoginTest#loginWrongPasswordShouldFail test
         env:
           TLU_USERNAME: ${{ secrets.TLU_USERNAME }}
           TLU_PASSWORD: ${{ secrets.TLU_PASSWORD }}

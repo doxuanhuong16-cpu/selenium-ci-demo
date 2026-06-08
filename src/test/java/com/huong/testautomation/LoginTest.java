@@ -12,16 +12,60 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Test;
 
-public abstract class LoginTestBase {
+public class LoginTest {
 
-    protected static final String LOGIN_URL = "https://sinhvien1.tlu.edu.vn/#/login";
+    private static final String LOGIN_URL = "https://sinhvien1.tlu.edu.vn/#/login";
 
-    protected WebDriver driver;
+    private WebDriver driver;
 
-    protected WebDriver createDriver() {
+    @Test
+    public void loginSuccess() {
+        driver = createDriver();
+
+        String username = getRequiredEnv("TLU_USERNAME");
+        String password = getRequiredEnv("TLU_PASSWORD");
+
+        openLoginPageAndSubmit(username, password);
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/login")));
+
+        Assert.assertFalse(
+                driver.getCurrentUrl().contains("/login"),
+                "Correct password should let the user leave the login page.");
+    }
+
+    @Test
+    public void loginWrongPasswordShouldFail() {
+        driver = createDriver();
+
+        String username = getRequiredEnv("TLU_USERNAME");
+        String wrongPassword = "sai_mat_khau_123";
+
+        openLoginPageAndSubmit(username, wrongPassword);
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/login")));
+
+        Assert.assertFalse(
+                driver.getCurrentUrl().contains("/login"),
+                "This test is expected to fail: wrong password should not let the user leave the login page.");
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+            driver = null;
+        }
+    }
+
+    private WebDriver createDriver() {
         ChromeOptions options = new ChromeOptions();
 
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
@@ -40,15 +84,7 @@ public abstract class LoginTestBase {
         return chromeDriver;
     }
 
-    @AfterMethod(alwaysRun = true)
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-            driver = null;
-        }
-    }
-
-    protected void openLoginPageAndSubmit(String username, String password) {
+    private void openLoginPageAndSubmit(String username, String password) {
         driver.get(LOGIN_URL);
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
@@ -69,16 +105,6 @@ public abstract class LoginTestBase {
         loginButton.click();
     }
 
-    protected String getRequiredEnv(String name) {
-        String value = System.getenv(name);
-
-        if (value == null || value.isBlank()) {
-            throw new SkipException("Missing environment variable: " + name);
-        }
-
-        return value;
-    }
-
     private void typeValue(WebElement element, String value) {
         element.click();
         element.clear();
@@ -88,5 +114,15 @@ public abstract class LoginTestBase {
                 "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));"
                         + "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));",
                 element);
+    }
+
+    private String getRequiredEnv(String name) {
+        String value = System.getenv(name);
+
+        if (value == null || value.isBlank()) {
+            throw new SkipException("Missing environment variable: " + name);
+        }
+
+        return value;
     }
 }
