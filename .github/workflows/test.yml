@@ -31,3 +31,13 @@ jobs:
 
       - name: Run Maven Tests
         run: mvn test
+        env:
+          TLU_USERNAME: ${{ secrets.TLU_USERNAME }}
+          TLU_PASSWORD: ${{ secrets.TLU_PASSWORD }}
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
