@@ -21,7 +21,7 @@ public class LoginTest {
     private static final String LOGIN_URL = "https://sinhvien1.tlu.edu.vn/#/login";
     private static final String USERNAME = "2351067096";
     private static final String CORRECT_PASSWORD = "xuanhuong2005";
-    private static final String WRONG_PASSWORD = "sai_mat_khau_123";
+    private static final String WRONG_PASSWORD = "xuanhuong2005";
 
     private WebDriver driver;
 
