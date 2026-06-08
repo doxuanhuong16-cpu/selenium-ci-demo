@@ -13,13 +13,15 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 public class LoginTest {
 
     private static final String LOGIN_URL = "https://sinhvien1.tlu.edu.vn/#/login";
+    private static final String USERNAME = "2351067096";
+    private static final String CORRECT_PASSWORD = "xuanhuong2005";
+    private static final String WRONG_PASSWORD = "sai_mat_khau_123";
 
     private WebDriver driver;
 
@@ -27,10 +29,7 @@ public class LoginTest {
     public void loginSuccess() {
         driver = createDriver();
 
-        String username = getRequiredEnv("TLU_USERNAME");
-        String password = getRequiredEnv("TLU_PASSWORD");
-
-        openLoginPageAndSubmit(username, password);
+        openLoginPageAndSubmit(USERNAME, CORRECT_PASSWORD);
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
         wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/login")));
@@ -41,20 +40,16 @@ public class LoginTest {
     }
 
     @Test
-    public void loginWrongPasswordShouldFail() {
+    public void loginWrongPasswordShouldStayOnLoginPage() throws InterruptedException {
         driver = createDriver();
 
-        String username = getRequiredEnv("TLU_USERNAME");
-        String wrongPassword = "sai_mat_khau_123";
+        openLoginPageAndSubmit(USERNAME, WRONG_PASSWORD);
 
-        openLoginPageAndSubmit(username, wrongPassword);
+        Thread.sleep(3000);
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/login")));
-
-        Assert.assertFalse(
+        Assert.assertTrue(
                 driver.getCurrentUrl().contains("/login"),
-                "This test is expected to fail: wrong password should not let the user leave the login page.");
+                "Wrong password should keep the user on the login page.");
     }
 
     @AfterMethod(alwaysRun = true)
@@ -116,13 +111,4 @@ public class LoginTest {
                 element);
     }
 
-    private String getRequiredEnv(String name) {
-        String value = System.getenv(name);
-
-        if (value == null || value.isBlank()) {
-            throw new SkipException("Missing environment variable: " + name);
-        }
-
-        return value;
-    }
 }

@@ -64,7 +64,7 @@ jobs:
           key: maven-${{ hashFiles('**/pom.xml') }}
 
       - name: Run Login Wrong Password Test
-        run: mvn -Dtest=LoginTest#loginWrongPasswordShouldFail test
+        run: mvn -Dtest=LoginTest#loginWrongPasswordShouldStayOnLoginPage test
         env:
           TLU_USERNAME: ${{ secrets.TLU_USERNAME }}
           TLU_PASSWORD: ${{ secrets.TLU_PASSWORD }}
