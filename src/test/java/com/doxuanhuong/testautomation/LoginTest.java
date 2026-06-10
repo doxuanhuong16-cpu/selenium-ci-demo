@@ -1,4 +1,4 @@
-package com.huong.testautomation;
+package com.doxuanhuong.testautomation;
 
 import java.time.Duration;
 import java.util.List;
@@ -21,7 +21,7 @@ public class LoginTest {
     private static final String LOGIN_URL = "https://sinhvien1.tlu.edu.vn/#/login";
     private static final String USERNAME = "2351067096";
     private static final String CORRECT_PASSWORD = "xuanhuong2005";
-    private static final String WRONG_PASSWORD = "xuanhuong2005";
+    private static final String WRONG_PASSWORD = "saimatkhau";
 
     private WebDriver driver;
 

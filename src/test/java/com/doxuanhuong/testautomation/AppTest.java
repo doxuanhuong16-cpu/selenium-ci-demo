@@ -1,4 +1,4 @@
-package com.huong.testautomation;
+package com.doxuanhuong.testautomation;
 
 import static org.testng.Assert.assertTrue;
 
